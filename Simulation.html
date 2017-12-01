@@ -1,0 +1,420 @@
+﻿<!DOCTYPE html>
+<!-- Designed and Coded By Lutulu Mbiye -->
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>ALU Simulation</title>
+		<script><!-- ALU Operations -->
+			function Add(a,b){
+				document.getElementById("out").value = Number(a.value)+Number(b.value);
+				LUFlags(document.getElementById("out"));
+				AUFlag(a,b,document.getElementById("out"));
+				document.getElementById("out").innerHTML = toBin(document.getElementById("out"),8);
+				selectALU = 0;
+				return;
+				}
+			function AddC(a,b){
+				document.getElementById("out").value = Number(a.value)+Number(b.value)+1;
+				LUFlags(document.getElementById("out"));
+				AUFlag(a,b,document.getElementById("out"));
+				document.getElementById("out").innerHTML = toBin(document.getElementById("out"),8);
+				selectALU = 1;
+				return;
+				}
+			function Sub(a,b){
+				document.getElementById("out").value = 1+Number(a.value)+(255-Number(b.value));
+				LUFlags(document.getElementById("out"));
+				AUFlag(a,b,document.getElementById("out"));
+				document.getElementById("out").innerHTML = toBin(document.getElementById("out"),8);
+				selectALU = 2;
+				return;
+				}
+			function Increment(a){
+				document.getElementById("out").value = Number(a.value)+1;
+				LUFlags(document.getElementById("out"));
+				AUFlag(a,0,document.getElementById("out"));
+				document.getElementById("out").innerHTML = toBin(document.getElementById("out"),8);
+				selectALU = 3;
+				return;
+				}
+			function AUFlag(a,b,out){
+				if(out.value >=256) 
+					{
+					Cflag = 1;
+					out.value -= 256;
+					}	
+				else Cflag = 0;
+				if(a.value >= 128 && b.value >= 128)
+					{
+						if(out.value < 128) Vflag = 1;
+						else Vflag =0;
+					}
+				else if (a.value < 128 && b.value < 128)
+					{
+						if(out.value < 128) Vflag = 0;
+						else Vflag = 1;
+					}
+				else Vflag = 0;
+				}
+			
+			function Andlu(a,b){
+				document.getElementById("out").value = Number(a.value) & Number(b.value);
+				document.getElementById("out").innerHTML = toBin(document.getElementById("out"),8);
+				LUFlags(document.getElementById("out"));
+				selectALU = 4;
+				return;
+				}
+			function Orlu(a,b){
+				document.getElementById("out").value = Number(a.value) | Number(b.value);
+				document.getElementById("out").innerHTML = toBin(document.getElementById("out"),8);
+				LUFlags(document.getElementById("out"));
+				selectALU = 5;
+				return;
+				}
+			function Xorlu(a,b){
+				document.getElementById("out").value = Number(a.value)^Number(b.value);
+				document.getElementById("out").innerHTML = toBin(document.getElementById("out"),8);
+				LUFlags(document.getElementById("out"));
+				selectALU = 6;
+				return;
+				}
+			function Complement(a){
+				document.getElementById("out").value = 255-Number(a.value);
+				document.getElementById("out").innerHTML = toBin(document.getElementById("out"),8);
+				LUFlags(document.getElementById("out"));
+				selectALU = 7;
+				return;
+				}
+			function LUFlags(out){
+					var temp = out.value;
+					if (temp >255) temp -=256;
+					if(temp == 0) Zflag=1;
+					else Zflag = 0;
+					if(temp >= 128) Nflag = 1;
+					else Nflag = 0;
+					Vflag = 0;
+					Cflag = 0;
+				}
+		
+			function ShiftNone(a,b){
+				b.value = a.value;
+				b.innerHTML = toBin(b,8);
+				selectSHFT = 0;
+				return;
+				}			
+			function ShiftLeft(a,b){
+				b.value = a.value << 1;
+				if(b.value > 255) 
+					{
+					b.value -=256;
+					Cflag = 1;
+					}
+				else Cflag = 0;
+				FlagRegister(a,b);
+				b.innerHTML = toBin(b,8);
+				selectSHFT = 1;
+				return;
+				}
+			function ShiftRight(a,b){
+				b.value = a.value >>> 1;
+				FlagRegister(a,b);
+				b.innerHTML = toBin(b,8);
+				selectSHFT = 2;
+				Cflag = Number(a.value)%2;
+				return;
+				}
+			function SetAllZero(a,b){
+				b.value = 0;
+				b.innerHTML = toBin(b,8);
+				Cflag = 0;
+				Vflag = 0;
+				Nflag = 0;
+				Zflag = 0;
+				selectSHFT = 3;
+				return;
+				}
+			function FlagRegister(a,b){
+				if((b.value >= 128 && a.value<128) || (a.value >= 128 && b.value<128)) Vflag=1;
+				else Vflag =0;
+				if(b.value == 0) Zflag = 1;
+				else Zflag = 0;
+				if(b.value >= 128) Nflag =1;
+				else Nflag = 0;
+				return;
+				}			
+			
+			function Reset(){
+				document.getElementById("A").value = 0;
+				document.getElementById("B").value = 0;
+				loadRegister(document.getElementById("xout"),0);
+				loadRegister(document.getElementById("mbr"),0);
+				loadRegister(document.getElementById("rA"),0);
+				loadRegister(document.getElementById("rB"),0);
+				loadRegister(document.getElementById("out"),0);
+				return;
+				}
+			function loadRegister(register,input){
+				register.value = Number(input);
+				while(register.value > 255) register.value -=256;
+				register.innerHTML = toBin(register,8);
+				return;
+				}
+			function toBin(reg,bits){
+				var x = reg.value;
+				x = Number(x);
+				z = "";
+				for(var y=0;y<Number(bits);y++)
+				{
+					z += x%2;
+					x = (x/2)-(x%2)*.5;
+				}
+				return z.split("").reverse().join("");
+				}
+			function toBinS(val,bits){
+				var x = Number(val);
+				z = "";
+				for(var y=0;y<Number(bits);y++)
+				{
+					z += x%2;
+					x = (x/2)-(x%2)*.5;
+				}
+				return z.split("").reverse().join("");
+				}
+			function updateMem(){
+				document.getElementById("A0").innerHTML = toBinS(ScratchA[0],8);
+				document.getElementById("A1").innerHTML = toBinS(ScratchA[1],8);
+				document.getElementById("A2").innerHTML = toBinS(ScratchA[2],8);
+				document.getElementById("A3").innerHTML = toBinS(ScratchA[3],8);
+				document.getElementById("B0").innerHTML = toBinS(ScratchB[0],8);
+				document.getElementById("B1").innerHTML = toBinS(ScratchB[1],8);
+				document.getElementById("B2").innerHTML = toBinS(ScratchB[2],8);
+				document.getElementById("B3").innerHTML = toBinS(ScratchB[3],8);
+				}
+			<!-- Drawing -->
+			var selectSPMA = 0; var selectSPMB = 0; var selectSPMAW = 0; var selectSPMBW = 0;
+			var selectRA = 0; var selectRB = 0; var selectALU = 0; var selectSHFT = 0;
+			var selectSelect = 0;var selectMBR = 0;
+			var Nflag = 0; var Zflag = 0; var Vflag = 0; var Cflag = 0;
+			var ScratchA = [0,0,0,0];
+			var ScratchB = [0,0,0,0];
+			
+			function clearSelectlines(){
+				selectSPMA = 0;
+				selectSPMB = 0;
+				selectSPMAW = 0;
+				selectSPMBW = 0;
+				selectRA = 0;
+				selectRB = 0;
+				selectSelect = 0;
+				selectMBR = 0;
+				return;
+				}
+			function drawing(canv){
+					var prop = canv.getContext("2d");
+					/*Blocks*/
+					prop.clearRect(0,0,600,600);
+					prop.fillStyle = "#FF0000";
+					prop.fillRect(250,50,200,100); // Scratch pad
+					prop.fillStyle = "#0000FF";
+					prop.fillRect(250,200,90,25); //Register a
+					prop.fillRect(360,200,90,25); //Register b
+					prop.fillStyle = "#00FF00";
+					prop.fillRect(250,275,200,100);	//Alu
+					prop.fillStyle = "#8800FF";
+					prop.fillRect(250,400,200,25); //Shift
+					prop.fillStyle = "#FF8800";
+					prop.fillRect(175,475,200,25); //selector
+					prop.fillStyle = "#00FFFF";
+					prop.fillRect(50,400,100,25); //external
+					prop.fillStyle = "#FF88FF";
+					prop.fillRect(225,525,135,25); // mbr
+					
+					/* LINES*/
+					prop.beginPath();				//Scratch to A
+					prop.moveTo(300,150);
+					prop.lineTo(300,200);
+					prop.strokeStyle = "Purple";
+					prop.stroke();
+					
+					prop.beginPath();				//Scratch to B
+					prop.moveTo(400,150);
+					prop.lineTo(400,200);
+					prop.strokeStyle = "Purple";
+					prop.stroke();
+					
+					prop.beginPath();				//A to ALU
+					prop.moveTo(300,225);
+					prop.lineTo(300,275);
+					prop.strokeStyle = "Purple";
+					prop.stroke();
+					
+					prop.beginPath();				//B to ALU
+					prop.moveTo(400,225);
+					prop.lineTo(400,275);
+					prop.strokeStyle = "Purple";
+					prop.stroke();
+					
+					prop.beginPath();				//ALU to Shifter
+					prop.moveTo(350,375);
+					prop.lineTo(350,400);
+					prop.strokeStyle = "Purple";
+					prop.stroke();
+					
+					prop.beginPath();				//Shifter to selector and external
+					prop.moveTo(350,425);
+					prop.lineTo(350,475);
+					prop.moveTo(350,450);
+					prop.lineTo(425,450);
+					prop.lineTo(425,475);
+					prop.strokeStyle = "Purple";
+					prop.stroke();
+					
+					prop.beginPath();				//External to selector
+					prop.moveTo(100,425);
+					prop.lineTo(100,450);
+					prop.lineTo(200,450);
+					prop.lineTo(200,475);
+					prop.strokeStyle = "Purple";
+					prop.stroke();
+					
+					prop.beginPath();				//Selector to MBR
+					prop.moveTo(285,500);
+					prop.lineTo(285,525);
+					prop.strokeStyle = "Purple";
+					prop.stroke();
+					
+					prop.beginPath();				//MBR to Scratch
+					prop.moveTo(285,550);
+					prop.lineTo(285,575);
+					prop.lineTo(550,575);
+					prop.lineTo(550,25);
+					prop.lineTo(350,25);
+					prop.lineTo(350,50);
+					prop.strokeStyle = "Purple";
+					prop.stroke();
+					
+					selectLines(prop);
+					
+					/*Text*/
+					prop.fillStyle = "#000000";
+					prop.font = "16px Arial";
+					prop.fillText("Scratch Pad Memory",275,100);
+					prop.fillText("Register A",255,215);
+					prop.fillText("Register B",365,215);
+					prop.fillText("ALU",335,300);
+					prop.fillText("Shifter",325,415);
+					prop.fillText("Selector",245,495);
+					prop.fillText("External Input",50,415);
+					prop.fillText("Mem Buff Register",225,545);
+					prop.fillText("External Output",380,485);
+					if(Nflag == 1) prop.fillText("Negative Branch",25,100);
+					if(Vflag ==	 1) prop.fillText("Overflow Branch",25,116);
+				}
+			function selectLines(prop){
+					prop.fillStyle = "#000000";
+					prop.font = "16px Arial";
+					prop.fillText(toBinS(selectSPMA,2),205,80);
+					prop.fillText(toBinS(selectSPMAW,1),215,130);
+					prop.fillText(toBinS(selectSPMB,2),475,80);
+					prop.fillText(toBinS(selectSPMBW,1),475,130);
+					prop.fillText(toBinS(selectRA,1),215,215);
+					prop.fillText(toBinS(selectRB,1),475,215);
+					prop.fillText(toBinS(selectALU,3),200,330);
+					prop.fillText(toBinS(selectSHFT,2),205,415);
+					prop.fillText(toBinS(selectSelect,1),140,490);
+					prop.fillText(toBinS(selectMBR,1),190,540);
+					/*Flags*/
+					prop.fillText("N",50,35);
+					prop.fillText("Z",60,35);
+					prop.fillText("V",70,35);
+					prop.fillText("C",80,35);
+					prop.fillText(Nflag,50,50);
+					prop.fillText(Zflag,60,50);
+					prop.fillText(Vflag,70,50);
+					prop.fillText(Cflag,80,50);
+					
+					/* LINES*/
+					prop.beginPath();				//Mem select
+					prop.moveTo(250,75);
+					prop.lineTo(225,75);
+					prop.moveTo(450,75);
+					prop.lineTo(475,75);
+					prop.moveTo(250,125);
+					prop.lineTo(225,125);
+					prop.moveTo(450,125);
+					prop.lineTo(475,125);
+					
+					prop.moveTo(250,210);			//Registers
+					prop.lineTo(225,210);
+					prop.moveTo(450,210);
+					prop.lineTo(475,210);
+					
+					prop.moveTo(250,325);			//Alu
+					prop.lineTo(225,325);
+					
+					prop.moveTo(250,410);			//Shifter
+					prop.lineTo(225,410);
+					
+					prop.moveTo(175,485);			//selector
+					prop.lineTo(150,485);
+					
+					prop.moveTo(225,535);			//MBR
+					prop.lineTo(200,535);
+					
+					prop.strokeStyle = "Gray";
+					prop.stroke();
+				}
+		</script>
+	</head>
+	<body onload="Reset();drawing(canvas1);updateMem();" onclick="drawing(canvas1);clearSelectlines();updateMem();">
+		<div style="float:right;">
+			<canvas id="canvas1" width="600" height="600" style="border:1px solid #000000;">
+				Canvas Failed
+			</canvas>
+		</div>
+		<div>
+			Register A: <b id="rA"> </b>
+			<br>Register B: <b id="rB"> </b>
+			<br>ALU Output: <b id="out"></b>
+			<br>Shifter Output: <b id="xout"> </b>
+			<br>Memory Buffer Register: <b id="mbr"> </b><br></br>
+			<form>
+				External Input <input type="number" id="scratch"><br>
+				Address A <input type="number" id="A"><br>
+				Address B <input type="number" id="B"><br>
+			</form>
+			<button onclick="ScratchA[A.value%4]=mbr.value; selectSPMA=A.value; selectSPMAW=1;">Save ScratchA</button>
+			<button onclick="ScratchB[B.value%4]=mbr.value; selectSPMB=B.value; selectSPMBW=1;">Save ScratchB</button>
+			<button onclick="ScratchA[A.value%4]=mbr.value; selectSPMA=A.value; selectSPMAW=1;ScratchB[B.value%4]=mbr.value; selectSPMB=B.value; selectSPMBW=1;">Save ScratchA & ScracthB</button><br>
+			<button onclick="loadRegister(rA, ScratchA[A.value%4]);selectRA = 1;selectSPMA=A.value;">Load A</button>
+			<button onclick="loadRegister(rB, ScratchB[B.value%4]);selectRB = 1;selectSPMB=B.value;">Load B</button>
+			<button onclick="loadRegister(rA, ScratchA[A.value%4]);selectRA = 1;loadRegister(rB, ScratchB[B.value%4]);selectRB=1;selectSPMA=A.value;selectSPMB=B.value;">Load A & B</button><br></br>
+			<b>ALU OPERATION<br></b>
+			<!-- Arithmatic Unit Operations -->
+			<button onclick="Add(rA, rB);">Add</button>
+			<button onclick="AddC(rA, rB);">Add \w Carry</button>
+			<button onclick="Sub(rA, rB);";>Sub</button>
+			<button onclick="Increment(rA);">Increment A</button><br>
+			<!-- Logic Unit Operations -->
+			<button onclick="Andlu(rA, rB);">And</button>
+			<button onclick="Orlu(rA, rB);">Or</button>
+			<button onclick="Xorlu(rA, rB);">Xor</button>
+			<button onclick="Complement(rA);">Complement A</button><br></br>
+			<!-- Shifter -->
+			<b>Shift OPERATION<br></b>
+			<button onclick="ShiftNone(out,xout);">No Shift</button>
+			<button onclick="ShiftLeft(out,xout);">Shift Left</button>
+			<button onclick="ShiftRight(out,xout);">Shift Right</button>
+			<button onclick="SetAllZero(out,xout);">All Zero</button><br></br>
+			<!-- Selector -->
+			<b>Memory Buffer Register<br></b>
+			<button onclick="selectSelect=0;selectMBR=1;loadRegister(mbr,xout.value)">Load Shifter</button>
+			<button onclick="selectSelect=1;selectMBR=1;loadRegister(mbr,scratch.value)">Load External</button><br></br>
+			<b>Adr_Scratch A_Scratch B</b><br>
+			00_ <b id="A0"></b>_ <b id="B0"></b> <br>
+			01_ <b id="A1"></b>_ <b id="B1"></b> <br>
+			10_ <b id="A2"></b>_ <b id="B2"></b> <br>
+			11_ <b id="A3"></b>_ <b id="B3"></b> <br>
+		</div>
+	</body>
+</html><!-- BLAZE IT-->
